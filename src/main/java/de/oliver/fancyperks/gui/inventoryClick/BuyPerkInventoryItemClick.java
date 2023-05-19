@@ -6,7 +6,6 @@ import de.oliver.fancyperks.FancyPerks;
 import de.oliver.fancyperks.gui.customInventories.PerksInventory;
 import de.oliver.fancyperks.perks.Perk;
 import de.oliver.fancyperks.perks.PerkRegistry;
-import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
 import net.milkbowl.vault.economy.Economy;
