@@ -12,8 +12,6 @@ import de.oliver.fancyperks.gui.inventoryClick.BuyPerkInventoryItemClick;
 import de.oliver.fancyperks.gui.inventoryClick.TogglePerkInventoryItemClick;
 import de.oliver.fancyperks.listeners.*;
 import de.oliver.fancyperks.utils.FoliaScheduler;
-import net.byteflux.libby.BukkitLibraryManager;
-import net.byteflux.libby.Library;
 import net.luckperms.api.LuckPerms;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -38,7 +36,7 @@ public class FancyPerks extends JavaPlugin {
 
     public FancyPerks() {
         instance = this;
-        loadDependencies();
+        //loadDependencies();
         this.scheduler = ServerSoftware.isFolia()
                 ? new FoliaScheduler(instance)
                 : new BukkitScheduler(instance);
@@ -140,28 +138,28 @@ public class FancyPerks extends JavaPlugin {
 
     }
 
-    private void loadDependencies(){
-        BukkitLibraryManager paperLibraryManager = new BukkitLibraryManager(instance);
-        paperLibraryManager.addJitPack();
-
-        boolean hasFancyLib;
-        try{
-            Class.forName("de.oliver.fancylib.FancyLib");
-            hasFancyLib = true;
-        } catch (ClassNotFoundException e){
-            hasFancyLib = false;
-        }
-
-        if(!hasFancyLib){
-            getLogger().info("Loading FancyLib");
-            Library fancyLib = Library.builder()
-                    .groupId("com{}github{}FancyMcPlugins")
-                    .artifactId("FancyLib")
-                    .version("225ba14e03")
-                    .build();
-            paperLibraryManager.loadLibrary(fancyLib);
-        }
-    }
+    //private void loadDependencies(){
+    //    BukkitLibraryManager paperLibraryManager = new BukkitLibraryManager(instance);
+    //    paperLibraryManager.addJitPack();
+//
+    //    boolean hasFancyLib;
+    //    try{
+    //        Class.forName("de.oliver.fancylib.FancyLib");
+    //        hasFancyLib = true;
+    //    } catch (ClassNotFoundException e){
+    //        hasFancyLib = false;
+    //    }
+//
+    //    if(!hasFancyLib){
+    //        getLogger().info("Loading FancyLib");
+    //        Library fancyLib = Library.builder()
+    //                .groupId("com{}github{}FancyMcPlugins")
+    //                .artifactId("FancyLib")
+    //                .version("225ba14e03")
+    //                .build();
+    //        paperLibraryManager.loadLibrary(fancyLib);
+    //    }
+    //}
 
     public PerkManager getPerkManager() {
         return perkManager;
