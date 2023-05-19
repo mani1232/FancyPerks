@@ -41,7 +41,7 @@ public class LuckPermsListener {
                 MessageHelper.success(p, "Automatically enabled the " + perk.getDisplayName() + " perk");
             } else if (!p.hasPermission("fancyperks.perk." + perk.getSystemName())) {
                 MessageHelper.warning(p, "Perk " + perk.getDisplayName() + " turns off after 15 seconds");
-                FancyPerks.getInstance().getScheduler().runTaskLaterAsynchronously(15, () -> {
+                FancyPerks.getInstance().getScheduler().runTaskLater(p.getLocation(),15, () -> {
                     perk.revoke(p);
                     MessageHelper.success(p, "Automatically disabled the " + perk.getDisplayName() + " perk");
                 });
