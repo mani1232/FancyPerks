@@ -2,59 +2,69 @@ package de.oliver.fancyperks;
 
 import de.oliver.fancylib.FancyLib;
 import de.oliver.fancylib.Metrics;
-import de.oliver.fancylib.VersionFetcher;
 import de.oliver.fancylib.serverSoftware.ServerSoftware;
 import de.oliver.fancylib.serverSoftware.schedulers.BukkitScheduler;
 import de.oliver.fancylib.serverSoftware.schedulers.FancyScheduler;
+import de.oliver.fancylib.serverSoftware.schedulers.FoliaScheduler;
+import de.oliver.fancylib.versionFetcher.MasterVersionFetcher;
+import de.oliver.fancylib.versionFetcher.VersionFetcher;
 import de.oliver.fancyperks.commands.FancyPerksCMD;
 import de.oliver.fancyperks.commands.PerksCMD;
 import de.oliver.fancyperks.gui.inventoryClick.BuyPerkInventoryItemClick;
 import de.oliver.fancyperks.gui.inventoryClick.TogglePerkInventoryItemClick;
 import de.oliver.fancyperks.listeners.*;
-import de.oliver.fancyperks.utils.FoliaScheduler;
+import de.oliver.fancyperks.perks.Perk;
+import de.oliver.fancyperks.perks.PerkRegistry;
+import de.oliver.fancyperks.perks.impl.LavaRunnerPerk;
 import net.luckperms.api.LuckPerms;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.List;
 
 public class FancyPerks extends JavaPlugin {
 
     private static FancyPerks instance;
     private final PerkManager perkManager;
     private final VersionFetcher versionFetcher;
+    private final FancyScheduler fancyScheduler;
     private final FancyPerksConfig config;
     private boolean usingVault;
     private Economy vaultEconomy;
     private Permission vaultPermission;
     private boolean usingLuckPerms;
     private LuckPerms luckPerms;
-    private final FancyScheduler scheduler;
 
     public FancyPerks() {
         instance = this;
-        //loadDependencies();
-        this.scheduler = ServerSoftware.isFolia()
-                ? new FoliaScheduler(instance)
-                : new BukkitScheduler(instance);
 
         perkManager = new PerkManager();
-        versionFetcher = new VersionFetcher("https://api.modrinth.com/v2/project/fancyperks/version", "https://modrinth.com/plugin/fancyperks/versions");
+        versionFetcher = new MasterVersionFetcher("FancyPerks");
+        fancyScheduler = ServerSoftware.isFolia() ?
+                new FoliaScheduler(instance) :
+                new BukkitScheduler(instance);
         config = new FancyPerksConfig();
         usingVault = false;
+    }
+
+    public static FancyPerks getInstance() {
+        return instance;
     }
 
     @Override
     public void onEnable() {
         FancyLib.setPlugin(this);
 
-        scheduler.runTaskAsynchronously(() -> {
-            ComparableVersion newestVersion = versionFetcher.getNewestVersion();
+        new Thread(() -> {
+            ComparableVersion newestVersion = versionFetcher.fetchNewestVersion();
             ComparableVersion currentVersion = new ComparableVersion(getDescription().getVersion());
-            if(newestVersion == null){
+            if (newestVersion == null) {
                 getLogger().warning("Could not fetch latest plugin version");
             } else if (newestVersion.compareTo(currentVersion) > 0) {
                 getLogger().warning("-------------------------------------------------------");
@@ -63,11 +73,11 @@ public class FancyPerks extends JavaPlugin {
                 getLogger().warning(versionFetcher.getDownloadUrl());
                 getLogger().warning("-------------------------------------------------------");
             }
-        });
+        }).start();
 
         PluginManager pluginManager = Bukkit.getPluginManager();
 
-        if(!ServerSoftware.isPaper()){
+        if (!ServerSoftware.isPaper()) {
             getLogger().warning("--------------------------------------------------");
             getLogger().warning("It is recommended to use Paper as server software.");
             getLogger().warning("Because you are not using paper, the plugin");
@@ -76,7 +86,7 @@ public class FancyPerks extends JavaPlugin {
         }
 
         usingVault = pluginManager.getPlugin("Vault") != null;
-        if(usingVault){
+        if (usingVault) {
             RegisteredServiceProvider<Economy> economyProvider = Bukkit.getServicesManager().getRegistration(Economy.class);
             if (economyProvider != null) {
                 vaultEconomy = economyProvider.getProvider();
@@ -97,7 +107,7 @@ public class FancyPerks extends JavaPlugin {
         }
 
         usingLuckPerms = pluginManager.isPluginEnabled("LuckPerms");
-        if(usingLuckPerms){
+        if (usingLuckPerms) {
             RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
             if (provider != null) {
                 luckPerms = provider.getProvider();
@@ -122,7 +132,11 @@ public class FancyPerks extends JavaPlugin {
         pluginManager.registerEvents(new EntityDeathListener(), instance);
         pluginManager.registerEvents(new EntityTargetLivingEntityListener(), instance);
         pluginManager.registerEvents(new BlockDropItemListener(), instance);
-        if(usingLuckPerms && config.isActivatePerkOnPermissionSet()){
+        pluginManager.registerEvents(new PlayerItemDamageListener(), instance);
+        pluginManager.registerEvents(new BlockBreakListener(), instance);
+        pluginManager.registerEvents(new PlayerMoveListener(), instance);
+        pluginManager.registerEvents(new PlayerChangedWorldListener(), instance);
+        if (usingLuckPerms && config.isActivatePerkOnPermissionSet()) {
             new LuckPermsListener();
         }
 
@@ -131,35 +145,19 @@ public class FancyPerks extends JavaPlugin {
         BuyPerkInventoryItemClick.INSTANCE.register();
 
         perkManager.loadFromConfig();
+
+        if (PerkRegistry.LAVA_RUNNER.isEnabled()) {
+            LavaRunnerPerk lavaRunner = (LavaRunnerPerk) PerkRegistry.LAVA_RUNNER;
+            fancyScheduler.runTaskTimerAsynchronously(10, 10, () -> {
+                for (Player player : lavaRunner.getPlayerBlockCache().keySet()) {
+                    List<Perk> perks = perkManager.getEnabledPerks(player);
+                    if (perks.contains(PerkRegistry.LAVA_RUNNER)) {
+                        (lavaRunner).updateBlocks(player);
+                    }
+                }
+            });
+        }
     }
-
-    @Override
-    public void onDisable() {
-
-    }
-
-    //private void loadDependencies(){
-    //    BukkitLibraryManager paperLibraryManager = new BukkitLibraryManager(instance);
-    //    paperLibraryManager.addJitPack();
-//
-    //    boolean hasFancyLib;
-    //    try{
-    //        Class.forName("de.oliver.fancylib.FancyLib");
-    //        hasFancyLib = true;
-    //    } catch (ClassNotFoundException e){
-    //        hasFancyLib = false;
-    //    }
-//
-    //    if(!hasFancyLib){
-    //        getLogger().info("Loading FancyLib");
-    //        Library fancyLib = Library.builder()
-    //                .groupId("com{}github{}FancyMcPlugins")
-    //                .artifactId("FancyLib")
-    //                .version("225ba14e03")
-    //                .build();
-    //        paperLibraryManager.loadLibrary(fancyLib);
-    //    }
-    //}
 
     public PerkManager getPerkManager() {
         return perkManager;
@@ -169,6 +167,9 @@ public class FancyPerks extends JavaPlugin {
         return versionFetcher;
     }
 
+    public FancyScheduler getFancyScheduler() {
+        return fancyScheduler;
+    }
 
     public FancyPerksConfig getFanyPerksConfig() {
         return config;
@@ -190,15 +191,7 @@ public class FancyPerks extends JavaPlugin {
         return usingLuckPerms;
     }
 
-    public FancyScheduler getScheduler() {
-        return scheduler;
-    }
-
     public LuckPerms getLuckPerms() {
         return luckPerms;
-    }
-
-    public static FancyPerks getInstance() {
-        return instance;
     }
 }

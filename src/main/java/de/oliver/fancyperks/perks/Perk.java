@@ -11,7 +11,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public abstract class Perk {
 
@@ -20,12 +22,11 @@ public abstract class Perk {
     protected static final PerkManager perkManager = FancyPerks.getInstance().getPerkManager();
 
     protected final String systemName;
+    protected final ItemStack displayItem;
     protected String displayName;
     protected String description;
-    protected String time;
-    protected final ItemStack displayItem;
-
     protected boolean enabled;
+    protected List<String> disabledWorlds;
     protected boolean buyable;
     protected double price;
 
@@ -35,15 +36,29 @@ public abstract class Perk {
         this.description = description;
         this.displayItem = displayItem;
         this.enabled = true;
+        this.disabledWorlds = new ArrayList<>();
         this.buyable = false;
-        this.time = "-1";
     }
 
-    public void grant(Player player){
+    public boolean hasPermission(Player player) {
+        if (player.hasPermission("fancyperks.perk.*")) {
+            return true;
+        }
+
+        return player.hasPermission("fancyperks.perk." + systemName);
+    }
+
+    public boolean grant(Player player) {
+        if(disabledWorlds.contains(player.getWorld().getName())){
+            return false;
+        }
+
         perkManager.enablePerk(player, this);
+
+        return true;
     }
 
-    public void revoke(Player player){
+    public void revoke(Player player) {
         perkManager.disablePerk(player, this);
     }
 
@@ -91,6 +106,14 @@ public abstract class Perk {
         this.enabled = enabled;
     }
 
+    public List<String> getDisabledWorlds() {
+        return disabledWorlds;
+    }
+
+    public void setDisabledWorlds(List<String> disabledWorlds) {
+        this.disabledWorlds = disabledWorlds;
+    }
+
     public boolean isBuyable() {
         return buyable;
     }
@@ -105,13 +128,5 @@ public abstract class Perk {
 
     public void setPrice(double price) {
         this.price = price;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
     }
 }

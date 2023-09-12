@@ -7,28 +7,23 @@ import de.oliver.fancyperks.perks.PerkRegistry;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
 
 import java.util.List;
 
-public class FoodLevelChangeListener implements Listener {
+public class PlayerItemDamageListener implements Listener {
 
     @EventHandler
-    public void onFoodLevelChange(FoodLevelChangeEvent event) {
-        if (!(event.getEntity() instanceof Player p)) {
-            return;
-        }
+    public void onPlayerItemDamage(PlayerItemDamageEvent event) {
+        Player p = event.getPlayer();
 
         PerkManager perkManager = FancyPerks.getInstance().getPerkManager();
         List<Perk> perks = perkManager.getEnabledPerks(p);
 
-        int i = perks.indexOf(PerkRegistry.NO_HUNGER);
-
-        if (i == -1) {
-            return;
+        boolean hasAutoRepair = perks.contains(PerkRegistry.AUTO_REPAIR);
+        if (hasAutoRepair) {
+            event.setCancelled(true);
         }
-
-        event.setFoodLevel(20);
     }
 
 }

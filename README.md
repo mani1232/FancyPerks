@@ -6,9 +6,10 @@
 [![Downloads](https://img.shields.io/modrinth/dt/fancyperks?color=00AF5C&label=modrinth&style=flat&logo=modrinth)](https://modrinth.com/plugin/fancyperks/versions)
 
 # Fancy Perks
+
 A simple plugin that adds some fancy perks to your server.
 
-**Only supported for 1.19.4** _(might work in other version too tho)_<br>
+**Only supported for 1.20** _(might work in other version too tho)_<br>
 _Using [paper](https://papermc.io/downloads) is highly recommended_
 
 ## Get the plugin
@@ -29,7 +30,6 @@ You can download the latest versions at the following places:
 /fancyperks version - _Shows the current version_<br>
 /fancyperks reload - _Reloads the config_<br>
 
-
 ## Permissions
 
 To use a perk - ``fancyperks.perk.(perk name)``<br>
@@ -39,6 +39,7 @@ To use a perk - ``fancyperks.perk.(perk name)``<br>
 - Fast Digging
 - Night Vision
 - Water Breathing
+- Speed
 - Keep Exp
 - Fly
 - No Hunger
@@ -54,7 +55,11 @@ To use a perk - ``fancyperks.perk.(perk name)``<br>
 - Glowing
 - Telekinesis
 - Instant Smelt
+- Auto repair
+- Auto planting
+- Lava runner
 
 ## Build from source
+
 1. Clone this repo and run `gradlew reobfJar`
 2. The jar file will be in `build/libs/FancyPerks-<version>.jar`

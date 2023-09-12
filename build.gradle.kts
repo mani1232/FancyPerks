@@ -2,13 +2,13 @@ plugins {
     `java-library`
     id("xyz.jpenilla.run-paper") version "2.0.1" // Adds runServer and runMojangMappedServer tasks for testing
     id("maven-publish")
-    id ("com.github.johnrengelman.shadow") version "8.1.1";
-    id("io.papermc.paperweight.userdev") version "1.5.4"
+    id("com.github.johnrengelman.shadow") version "8.1.1";
 }
 
 group = "de.oliver"
-version = "1.0.2"
-description = "Perks plugin"
+description = "Simple plugin that adds perks to your server"
+version = "1.1.0"
+val mcVersion = "1.20.1"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
@@ -23,18 +23,17 @@ repositories {
 }
 
 dependencies {
-    paperweight.foliaDevBundle("1.19.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:$mcVersion-R0.1-SNAPSHOT")
+
+    implementation("de.oliver:FancyLib:1.0.4")
     compileOnly("net.kyori:adventure-text-minimessage:4.13.1")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("net.luckperms:api:5.4")
-
-    //implementation("net.byteflux:libby-bukkit:1.2.0")
-    implementation("com.github.FancyMcPlugins:FancyLib:225ba14e03")
 }
 
 tasks {
-    runServer{
-        minecraftVersion("1.19.4")
+    runServer {
+        minecraftVersion(mcVersion)
     }
 
     shadowJar{
@@ -64,5 +63,13 @@ tasks {
     }
     processResources {
         filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
+        val props = mapOf(
+            "version" to project.version,
+            "description" to project.description,
+        )
+        inputs.properties(props)
+        filesMatching("plugin.yml") {
+            expand(props)
+        }
     }
 }

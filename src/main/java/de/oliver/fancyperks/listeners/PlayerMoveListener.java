@@ -4,31 +4,31 @@ import de.oliver.fancyperks.FancyPerks;
 import de.oliver.fancyperks.PerkManager;
 import de.oliver.fancyperks.perks.Perk;
 import de.oliver.fancyperks.perks.PerkRegistry;
+import de.oliver.fancyperks.perks.impl.LavaRunnerPerk;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 import java.util.List;
 
-public class FoodLevelChangeListener implements Listener {
+public class PlayerMoveListener implements Listener {
 
     @EventHandler
-    public void onFoodLevelChange(FoodLevelChangeEvent event) {
-        if (!(event.getEntity() instanceof Player p)) {
+    public void onPlayerMove(PlayerMoveEvent event) {
+        if (!event.hasChangedPosition()) {
             return;
         }
+
+        Player p = event.getPlayer();
 
         PerkManager perkManager = FancyPerks.getInstance().getPerkManager();
         List<Perk> perks = perkManager.getEnabledPerks(p);
 
-        int i = perks.indexOf(PerkRegistry.NO_HUNGER);
-
-        if (i == -1) {
-            return;
+        boolean hasLavaRunner = perks.contains(PerkRegistry.LAVA_RUNNER);
+        if (hasLavaRunner) {
+            ((LavaRunnerPerk) PerkRegistry.LAVA_RUNNER).updateBlocks(p);
         }
-
-        event.setFoodLevel(20);
     }
 
 }
