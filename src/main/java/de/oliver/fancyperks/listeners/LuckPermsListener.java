@@ -39,7 +39,7 @@ public class LuckPermsListener {
             }
 
             if (event.getNode().getValue() && p.hasPermission("fancyperks.perk." + perk.getSystemName())) {
-                FancyPerks.getInstance().getScheduler().runTask(p.getLocation(), () -> {
+                FancyPerks.getInstance().getFancyScheduler().runTask(p.getLocation(), () -> {
                     perk.grant(p);
                     MessageHelper.success(p, "Automatically enabled the " + perk.getDisplayName() + " perk");
                 });
@@ -69,7 +69,7 @@ public class LuckPermsListener {
 
             if (!p.hasPermission("fancyperks.perk." + perk.getSystemName())) {
                 MessageHelper.warning(p, "Perk " + perk.getDisplayName() + " turns off after 15 seconds");
-                FancyPerks.getInstance().getScheduler().runTaskLater(p.getLocation(), 15 * 20, () -> {
+                FancyPerks.getInstance().getFancyScheduler().runTaskLater(p.getLocation(), 15 * 20, () -> {
                     perk.revoke(p);
                     MessageHelper.success(p, "Automatically disabled the " + perk.getDisplayName() + " perk");
                 });

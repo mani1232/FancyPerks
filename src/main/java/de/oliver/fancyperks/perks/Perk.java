@@ -29,6 +29,7 @@ public abstract class Perk {
     protected List<String> disabledWorlds;
     protected boolean buyable;
     protected double price;
+    protected String time;
 
     public Perk(String systemName, String displayName, String description, ItemStack displayItem) {
         this.systemName = systemName;
@@ -38,6 +39,7 @@ public abstract class Perk {
         this.enabled = true;
         this.disabledWorlds = new ArrayList<>();
         this.buyable = false;
+        this.time = "-1";
     }
 
     public boolean hasPermission(Player player) {
@@ -128,5 +130,13 @@ public abstract class Perk {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }
