@@ -12,7 +12,7 @@ public class FlyPerk extends Perk {
 
     @Override
     public boolean grant(Player player) {
-        if(!super.grant(player)) return false;
+        if (!super.grant(player)) return false;
 
         player.setAllowFlight(true);
         return true;

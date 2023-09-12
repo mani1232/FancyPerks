@@ -13,6 +13,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class Perk {
@@ -51,7 +52,7 @@ public abstract class Perk {
     }
 
     public boolean grant(Player player) {
-        if(disabledWorlds.contains(player.getWorld().getName())){
+        if (disabledWorlds.contains(player.getWorld().getName())) {
             return false;
         }
 
@@ -70,7 +71,7 @@ public abstract class Perk {
         item.editMeta(itemMeta -> {
             final String primaryColor = MessageHelper.getPrimaryColor();
             itemMeta.displayName(MessageHelper.removeDecoration(MiniMessage.miniMessage().deserialize("<color:" + primaryColor + ">" + displayName + "</color>"), TextDecoration.ITALIC));
-            itemMeta.lore(Arrays.asList(
+            itemMeta.lore(Collections.singletonList(
                     MessageHelper.removeDecoration(MiniMessage.miniMessage().deserialize("<gray>" + description + "</gray>"), TextDecoration.ITALIC)
             ));
 

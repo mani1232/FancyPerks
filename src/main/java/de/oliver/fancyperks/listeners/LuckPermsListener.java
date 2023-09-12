@@ -25,7 +25,7 @@ public class LuckPermsListener {
             return;
         }
 
-        String perkStr = permission.substring(permission.lastIndexOf('.') + 1, permission.length());
+        String perkStr = permission.substring(permission.lastIndexOf('.') + 1);
         Perk perk = PerkRegistry.getPerkByName(perkStr);
         if (perk == null) {
             return;
@@ -54,7 +54,7 @@ public class LuckPermsListener {
             return;
         }
 
-        String perkStr = permission.substring(permission.lastIndexOf('.') + 1, permission.length());
+        String perkStr = permission.substring(permission.lastIndexOf('.') + 1);
         Perk perk = PerkRegistry.getPerkByName(perkStr);
         if (perk == null) {
             return;

@@ -31,61 +31,7 @@ public class BuyPerkInventoryItemClick implements InventoryItemClick {
             Perk.PERK_KEY
     );
 
-    private BuyPerkInventoryItemClick(){ }
-
-    @Override
-    public String getId() {
-        return "buyPerk";
-    }
-
-    @Override
-    public void onClick(InventoryClickEvent event, Player player) {
-        Player p = (Player) event.getWhoClicked();
-        ItemStack item = event.getCurrentItem();
-
-        if(item != null && InventoryItemClick.hasKeys(item, REQUIRED_KEYS)){
-            event.setCancelled(true);
-            String perkName = item.getItemMeta().getPersistentDataContainer().get(Perk.PERK_KEY, PersistentDataType.STRING);
-            Perk perk = PerkRegistry.getPerkByName(perkName);
-
-            if(perk == null || !perk.isBuyable() || !FancyPerks.getInstance().isUsingVault()){
-                return;
-            }
-
-            Economy economy = FancyPerks.getInstance().getVaultEconomy();
-            Permission permission = FancyPerks.getInstance().getVaultPermission();
-
-            if (!economy.has(player, perk.getPrice())) {
-                MessageHelper.error(player, "You don't own enough money to buy this perk");
-                return;
-            }
-
-            EconomyResponse response = economy.withdrawPlayer(player, perk.getPrice());
-            if (!response.transactionSuccess()) {
-                MessageHelper.warning(player, "Transaction was not successful");
-                return;
-            }
-
-            if (!perk.getTime().equals("-1")) {
-                Node node = Node.builder("fancyperks.perk." + perk.getSystemName())
-                        .value(true)
-                        .expiry(parseTime(perk.getTime()))
-                        .build();
-                User user = FancyPerks.getInstance().getLuckPerms().getUserManager().getUser(player.getUniqueId());
-                if (user != null) {
-                    user.data().add(node);
-                    FancyPerks.getInstance().getLuckPerms().getUserManager().saveUser(user);
-                } else {
-                    MessageHelper.warning(player, "Could not find you");
-                }
-            } else if (!permission.playerAdd(null, player, "fancyperks.perk." + perk.getSystemName())){
-                MessageHelper.warning(player, "Could not give you the perk");
-                return;
-            }
-
-            perk.grant(p);
-            event.setCurrentItem(PerksInventory.getEnabledPerkItem(perk));
-        }
+    private BuyPerkInventoryItemClick() {
     }
 
     public static Duration parseTime(String time) {
@@ -125,6 +71,61 @@ public class BuyPerkInventoryItemClick implements InventoryItemClick {
             FancyPerks.getInstance().getLogger().warning("Invalid time format " + time);
         }
         return null;
+    }
+
+    @Override
+    public String getId() {
+        return "buyPerk";
+    }
+
+    @Override
+    public void onClick(InventoryClickEvent event, Player player) {
+        Player p = (Player) event.getWhoClicked();
+        ItemStack item = event.getCurrentItem();
+
+        if (item != null && InventoryItemClick.hasKeys(item, REQUIRED_KEYS)) {
+            event.setCancelled(true);
+            String perkName = item.getItemMeta().getPersistentDataContainer().get(Perk.PERK_KEY, PersistentDataType.STRING);
+            Perk perk = PerkRegistry.getPerkByName(perkName);
+
+            if (perk == null || !perk.isBuyable() || !FancyPerks.getInstance().isUsingVault()) {
+                return;
+            }
+
+            Economy economy = FancyPerks.getInstance().getVaultEconomy();
+            Permission permission = FancyPerks.getInstance().getVaultPermission();
+
+            if (!economy.has(player, perk.getPrice())) {
+                MessageHelper.error(player, "You don't own enough money to buy this perk");
+                return;
+            }
+
+            EconomyResponse response = economy.withdrawPlayer(player, perk.getPrice());
+            if (!response.transactionSuccess()) {
+                MessageHelper.warning(player, "Transaction was not successful");
+                return;
+            }
+
+            if (!perk.getTime().equals("-1")) {
+                Node node = Node.builder("fancyperks.perk." + perk.getSystemName())
+                        .value(true)
+                        .expiry(parseTime(perk.getTime()))
+                        .build();
+                User user = FancyPerks.getInstance().getLuckPerms().getUserManager().getUser(player.getUniqueId());
+                if (user != null) {
+                    user.data().add(node);
+                    FancyPerks.getInstance().getLuckPerms().getUserManager().saveUser(user);
+                } else {
+                    MessageHelper.warning(player, "Could not find you");
+                }
+            } else if (!permission.playerAdd(null, player, "fancyperks.perk." + perk.getSystemName())) {
+                MessageHelper.warning(player, "Could not give you the perk");
+                return;
+            }
+
+            perk.grant(p);
+            event.setCurrentItem(PerksInventory.getEnabledPerkItem(perk));
+        }
     }
 
 }

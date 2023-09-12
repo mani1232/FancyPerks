@@ -44,7 +44,7 @@ public class PlayerJoinListener implements Listener {
         List<Perk> perks = perkManager.getEnabledPerks(event.getPlayer());
 
         for (Perk perk : perks) {
-            if(perk.getDisabledWorlds().contains(p.getWorld().getName())){
+            if (perk.getDisabledWorlds().contains(p.getWorld().getName())) {
                 MessageHelper.warning(p, "The " + perk.getSystemName() + " perk is disabled in this world");
                 continue;
             }

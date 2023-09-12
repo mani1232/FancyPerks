@@ -15,14 +15,14 @@ import java.util.List;
 public class PlayerChangedWorldListener implements Listener {
 
     @EventHandler
-    public void onPlayerChangedWorld(PlayerChangedWorldEvent event){
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
         Player p = event.getPlayer();
 
         PerkManager perkManager = FancyPerks.getInstance().getPerkManager();
         List<Perk> perks = perkManager.getEnabledPerks(p);
 
         for (Perk perk : new ArrayList<>(perks)) {
-            if(perk.getDisabledWorlds().contains(p.getWorld().getName())){
+            if (perk.getDisabledWorlds().contains(p.getWorld().getName())) {
                 perk.revoke(p);
                 MessageHelper.warning(p, "The " + perk.getSystemName() + " perk is disabled in this world");
             }

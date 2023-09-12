@@ -12,7 +12,7 @@ public class AutoRepairPerk extends Perk {
 
     @Override
     public boolean grant(Player player) {
-        if(!super.grant(player)) return false;
+        if (!super.grant(player)) return false;
 
         for (ItemStack item : player.getInventory().getContents()) {
             if (item == null) {
